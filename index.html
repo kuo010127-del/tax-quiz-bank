@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>국세청 내부자격시험 문제은행</title>
+  <style>
+    /*
+      이 파일은 화면 구조(HTML), 디자인(CSS), 동작(JavaScript)을 함께 담고 있습니다.
+      문제 데이터는 이 파일 안에 직접 넣지 않고 questions_v3_explanation_images.json에서 불러옵니다.
+    */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f2f5f9;
+      color: #172033;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 580px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    .quiz-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #dce3ee;
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(32, 48, 76, 0.08);
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .header {
+      padding: 18px;
+      background: #173b67;
+      color: #ffffff;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      color: #d7e5f7;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .logout-button {
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .logout-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .login-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .login-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .login-field label {
+      color: #44546a;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .login-field input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #c9d4e3;
+      border-radius: 8px;
+      color: #172033;
+      font-size: 16px;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #173b67;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .login-button:hover {
+      background: #235489;
+    }
+
+    .login-error {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #fdecec;
+      color: #7f1d1d;
+      border: 1px solid #f0a5a5;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .content {
+      padding: 18px;
+    }
+
+    .filters {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #dce3ee;
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .filter-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .filter-row label {
+      color: #44546a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .filter-row select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #c9d4e3;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #172033;
+      font-size: 15px;
+    }
+
+    .filter-summary {
+      color: #5a6b82;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: #5a6b82;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .meta {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef5ff;
+      color: #254465;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .question {
+      margin: 0 0 18px;
+      font-size: 19px;
+      line-height: 1.65;
+      font-weight: 800;
+      white-space: pre-line;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .question-html {
+      white-space: normal;
+      line-height: 1.65;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .question-html table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 0.95rem;
+      font-weight: 400;
+      word-break: keep-all;
+    }
+
+    .question-html th,
+    .question-html td {
+      border: 1px solid #d0d7e2;
+      padding: 8px 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .question-html th {
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .question-image {
+      white-space: normal;
+    }
+
+    .question-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      border: 1px solid #d0d7e2;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .explanation-image {
+      white-space: normal;
+    }
+
+    .explanation-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      border: 1px solid #d0d7e2;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .image-error {
+      padding: 18px;
+      border-radius: 8px;
+      background: #fdecec;
+      color: #7f1d1d;
+      border: 1px solid #f0a5a5;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 12px 0;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-button {
+      width: 100%;
+      padding: 14px 15px;
+      border: 1px solid #c9d4e3;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #172033;
+      font-size: 16px;
+      line-height: 1.55;
+      text-align: left;
+      cursor: pointer;
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .choice-button:not(:disabled):hover {
+      background: #eef5ff;
+      border-color: #79a8df;
+    }
+
+    .choice-button.correct {
+      background: #e8f7ed;
+      border-color: #2e9d54;
+      color: #14532d;
+      font-weight: 800;
+    }
+
+    .choice-button.wrong {
+      background: #fdecec;
+      border-color: #d64545;
+      color: #7f1d1d;
+      font-weight: 800;
+    }
+
+    .choice-button:disabled {
+      cursor: default;
+    }
+
+    .result-message {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .result-message.correct {
+      display: block;
+      background: #e8f7ed;
+      color: #14532d;
+      border: 1px solid #9ed8b0;
+    }
+
+    .result-message.wrong {
+      display: block;
+      background: #fdecec;
+      color: #7f1d1d;
+      border: 1px solid #f0a5a5;
+    }
+
+    .explanation {
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-left: 4px solid #326ca8;
+      background: #f6f9fd;
+      color: #334155;
+      line-height: 1.65;
+      border-radius: 6px;
+      white-space: pre-line;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .explanation.show {
+      display: block;
+    }
+
+    .footer {
+      padding: 16px 18px 18px;
+      border-top: 1px solid #e5ebf3;
+      background: #fbfcfe;
+    }
+
+    .next-button {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #173b67;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .next-button:hover {
+      background: #235489;
+    }
+
+    .next-button:disabled {
+      background: #aab6c5;
+      cursor: default;
+    }
+
+    .score-box {
+      text-align: center;
+      padding: 12px 0 6px;
+    }
+
+    .score-number {
+      margin: 12px 0;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 900;
+      color: #173b67;
+    }
+
+    .score-detail {
+      margin: 0;
+      color: #44546a;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .error-box {
+      padding: 18px;
+      border-radius: 8px;
+      background: #fdecec;
+      color: #7f1d1d;
+      border: 1px solid #f0a5a5;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .empty-box {
+      padding: 18px;
+      border-radius: 8px;
+      background: #fff7e6;
+      color: #6b4a00;
+      border: 1px solid #f0cd7a;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 420px) {
+      .app {
+        padding: 12px;
+        align-items: stretch;
+      }
+
+      .quiz-card {
+        min-height: calc(100vh - 24px);
+      }
+
+      .header h1 {
+        font-size: 19px;
+      }
+
+      .question {
+        font-size: 18px;
+      }
+
+      .choice-button {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="quiz-card" id="loginPanel">
+      <header class="header">
+        <h1>국세청 내부자격시험 문제은행</h1>
+        <p>임시 접근 제한을 위해 로그인 후 이용할 수 있습니다.</p>
+      </header>
+
+      <div class="content">
+        <form class="login-form" id="loginForm">
+          <div class="login-field">
+            <label for="usernameInput">아이디</label>
+            <input id="usernameInput" type="text" autocomplete="username" required>
+          </div>
+
+          <div class="login-field">
+            <label for="passwordInput">비밀번호</label>
+            <input id="passwordInput" type="password" autocomplete="current-password" required>
+          </div>
+
+          <div class="login-error" id="loginError">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+          <button class="login-button" type="submit">로그인</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="quiz-card hidden" id="appPanel">
+      <header class="header">
+        <div class="header-top">
+          <div>
+            <h1>국세청 내부자격시험 문제은행</h1>
+            <p>questions_v3_explanation_images.json에서 문제를 불러와 회차별 랜덤 문제를 출제합니다.</p>
+          </div>
+          <button class="logout-button" id="logoutButton" type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <div class="content" id="quizArea">
+        <div class="filters">
+          <div class="filter-row">
+            <label for="subjectFilter">과목 필터</label>
+            <select id="subjectFilter" disabled>
+              <option value="all">전체 과목</option>
+            </select>
+          </div>
+
+          <div class="filter-row">
+            <label for="chapterFilter">챕터 필터</label>
+            <select id="chapterFilter" disabled>
+              <option value="all">전체 챕터</option>
+            </select>
+          </div>
+
+          <div class="filter-row">
+            <label for="displayTypeFilter">표시 방식 필터</label>
+            <select id="displayTypeFilter" disabled>
+              <option value="all">전체</option>
+              <option value="text">텍스트 문제</option>
+              <option value="image">이미지 문제</option>
+            </select>
+          </div>
+
+          <div class="filter-summary" id="filterSummary">문제 데이터를 불러오는 중입니다.</div>
+        </div>
+
+        <div class="progress-row">
+          <span id="questionCount">문제 불러오는 중</span>
+          <span id="scoreCount">정답 0개</span>
+        </div>
+
+        <div class="meta" id="questionMeta">잠시만 기다려 주세요.</div>
+        <div class="question" id="questionText"></div>
+        <div class="choices" id="choicesArea"></div>
+        <div class="result-message" id="resultMessage"></div>
+        <div class="explanation" id="explanationBox"></div>
+      </div>
+
+      <footer class="footer">
+        <button class="next-button" id="nextButton" disabled>다음 문제</button>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    /*
+      이 앱의 핵심 흐름입니다.
+
+      1. questions_v3_explanation_images.json 파일을 fetch로 불러옵니다.
+      2. 사용자가 선택한 과목/챕터/표시 방식 필터에 맞는 문제를 고릅니다.
+      3. 그 문제들 중 최대 20문제를 랜덤으로 뽑습니다.
+      4. 한 문제씩 보여주고, 사용자가 보기를 누르면 바로 채점합니다.
+      5. 마지막 문제 후 총 문제 수, 정답 수, 정답률을 보여줍니다.
+      6. 다시 풀기를 누르면 현재 필터 안에서 다시 랜덤으로 문제를 뽑습니다.
+    */
+
+    /*
+      한 회차에 출제할 최대 문제 수입니다.
+      전체 문제가 20개보다 적으면 전체 문제만 출제합니다.
+    */
+    /*
+      임시 접근 제한용 허용 계정 목록입니다.
+      배포 전에 아이디와 비밀번호를 이곳에서 직접 수정하면 됩니다.
+      이 방식은 강한 보안 기능이 아니라, 프론트엔드에서만 동작하는 간단한 제한입니다.
+    */
+    const USERS = [
+      { username: "admin", password: "1234" }
+    ];
+
+    const LOGIN_SESSION_KEY = "quizBankLoggedIn";
+    const QUESTIONS_PER_ROUND = 20;
+
+    /*
+      questions_v3_explanation_images.json에서 읽어 온 전체 문제를 저장합니다.
+      예전처럼 이 파일 안에 questions 배열을 직접 만들지 않습니다.
+    */
+    let allQuestions = [];
+
+    /*
+      이번 회차에 실제로 출제할 문제 목록입니다.
+      allQuestions에서 랜덤으로 뽑아서 여기에 저장합니다.
+    */
+    let roundQuestions = [];
+
+    let currentQuestionIndex = 0;
+    let correctCount = 0;
+    let hasAnswered = false;
+
+    const loginPanel = document.getElementById("loginPanel");
+    const appPanel = document.getElementById("appPanel");
+    const loginForm = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("usernameInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const loginError = document.getElementById("loginError");
+    const logoutButton = document.getElementById("logoutButton");
+    const quizArea = document.getElementById("quizArea");
+    const questionCount = document.getElementById("questionCount");
+    const scoreCount = document.getElementById("scoreCount");
+    const questionMeta = document.getElementById("questionMeta");
+    const questionText = document.getElementById("questionText");
+    const choicesArea = document.getElementById("choicesArea");
+    const resultMessage = document.getElementById("resultMessage");
+    const explanationBox = document.getElementById("explanationBox");
+    const nextButton = document.getElementById("nextButton");
+    const subjectFilter = document.getElementById("subjectFilter");
+    const chapterFilter = document.getElementById("chapterFilter");
+    const displayTypeFilter = document.getElementById("displayTypeFilter");
+    const filterSummary = document.getElementById("filterSummary");
+
+    /*
+      로그인 상태를 확인합니다.
+      sessionStorage는 브라우저 탭이 열려 있는 동안만 유지되므로,
+      탭을 닫았다가 다시 열면 다시 로그인해야 합니다.
+    */
+    function isLoggedIn() {
+      return sessionStorage.getItem(LOGIN_SESSION_KEY) === "true";
+    }
+
+    /*
+      로그인 화면과 문제은행 화면 중 무엇을 보여줄지 결정합니다.
+      로그인 전에는 문제은행 화면과 필터 영역을 숨기고, 문제 데이터도 불러오지 않습니다.
+    */
+    function showScreenForLoginState() {
+      if (isLoggedIn()) {
+        loginPanel.classList.add("hidden");
+        appPanel.classList.remove("hidden");
+        loadQuestionsIfNeeded();
+      } else {
+        appPanel.classList.add("hidden");
+        loginPanel.classList.remove("hidden");
+        usernameInput.focus();
+      }
+    }
+
+    /*
+      로그인 버튼을 눌렀을 때 실행됩니다.
+      USERS 배열에 있는 계정과 일치하면 sessionStorage에 로그인 상태를 저장합니다.
+    */
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const matchedUser = USERS.find(function(user) {
+        return user.username === username && user.password === password;
+      });
+
+      if (!matchedUser) {
+        loginError.classList.add("show");
+        passwordInput.value = "";
+        passwordInput.focus();
+        return;
+      }
+
+      sessionStorage.setItem(LOGIN_SESSION_KEY, "true");
+      loginError.classList.remove("show");
+      passwordInput.value = "";
+      showScreenForLoginState();
+    }
+
+    /*
+      로그아웃하면 sessionStorage의 로그인 상태를 삭제하고 로그인 화면으로 돌아갑니다.
+    */
+    function handleLogout() {
+      sessionStorage.removeItem(LOGIN_SESSION_KEY);
+      window.location.reload();
+    }
+
+    /*
+      이미 문제 데이터를 불러온 상태라면 다시 fetch하지 않습니다.
+      로그인 직후 또는 새로고침 후 로그인 상태가 남아 있을 때만 필요한 만큼 불러옵니다.
+    */
+    function loadQuestionsIfNeeded() {
+      if (allQuestions.length > 0) {
+        return;
+      }
+
+      loadQuestions();
+    }
+
+    /*
+      fetch는 외부 파일을 불러올 때 사용하는 JavaScript 기능입니다.
+      여기서는 index.html과 같은 폴더에 있는 questions_v3_explanation_images.json을 불러옵니다.
+
+      주의:
+      일부 브라우저는 file://로 연 HTML에서 fetch를 막을 수 있습니다.
+      그럴 때는 이 폴더에서 간단한 로컬 서버를 실행한 뒤 접속하면 됩니다.
+    */
+    async function loadQuestions() {
+      try {
+        const response = await fetch("./questions_v3_explanation_images.json", { cache: "no-store" });
+
+        /*
+          response.ok가 false이면 파일을 찾지 못했거나 서버 오류가 난 것입니다.
+        */
+        if (!response.ok) {
+          throw new Error("questions_v3_explanation_images.json 응답 오류");
+        }
+
+        const data = await response.json();
+
+        /*
+          JSON 파일의 최상위 형태가 배열인지 확인합니다.
+          문제 목록은 반드시 [ {...}, {...} ] 형태여야 합니다.
+        */
+        if (!Array.isArray(data)) {
+          throw new Error("questions_v3_explanation_images.json은 배열이어야 합니다.");
+        }
+
+        allQuestions = data;
+        setupFilters();
+        startNewRound();
+      } catch (error) {
+        showLoadError();
+      }
+    }
+
+    /*
+      과목 필터와 챕터 필터를 만드는 함수입니다.
+
+      questions_v3_explanation_images.json에는 subject, chapter, chapterTitle이 들어 있으므로
+      이 값을 모아서 select 옵션으로 보여줍니다.
+    */
+    function setupFilters() {
+      const subjects = getUniqueValues(allQuestions, "subject");
+
+      subjectFilter.innerHTML = `<option value="all">전체 과목</option>`;
+
+      subjects.forEach(function(subject) {
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = subject;
+        subjectFilter.appendChild(option);
+      });
+
+      subjectFilter.disabled = false;
+      chapterFilter.disabled = false;
+      displayTypeFilter.disabled = false;
+
+      updateChapterOptions();
+
+      /*
+        과목이 바뀌면 챕터 목록도 함께 바뀌어야 합니다.
+        예를 들어 국세기본법을 고르면 국세기본법 챕터만 보여주는 식입니다.
+      */
+      subjectFilter.addEventListener("change", function() {
+        updateChapterOptions();
+        startNewRound();
+      });
+
+      /*
+        챕터가 바뀌면 현재 선택된 과목/챕터 조건으로 새 회차를 시작합니다.
+      */
+      chapterFilter.addEventListener("change", function() {
+        startNewRound();
+      });
+
+      /*
+        표시 방식 필터를 바꾸면 텍스트 문제만 또는 이미지 문제만 따로 검수할 수 있습니다.
+      */
+      displayTypeFilter.addEventListener("change", function() {
+        startNewRound();
+      });
+    }
+
+    /*
+      특정 key의 중복 없는 값 목록을 만드는 함수입니다.
+      예: subject 값만 모으면 과목 목록이 됩니다.
+    */
+    function getUniqueValues(questionList, key) {
+      const values = questionList.map(function(question) {
+        return question[key];
+      });
+
+      const uniqueValues = [...new Set(values)];
+
+      return uniqueValues
+        .filter(function(value) {
+          return value !== undefined && value !== null && value !== "";
+        })
+        .sort(function(a, b) {
+          return String(a).localeCompare(String(b), "ko");
+        });
+    }
+
+    /*
+      현재 선택된 과목에 맞춰 챕터 필터 옵션을 다시 만듭니다.
+    */
+    function updateChapterOptions() {
+      const selectedSubject = subjectFilter.value;
+      const questionsForSubject = selectedSubject === "all"
+        ? allQuestions
+        : allQuestions.filter(function(question) {
+            return question.subject === selectedSubject;
+          });
+
+      const chapterMap = new Map();
+
+      questionsForSubject.forEach(function(question) {
+        const chapterKey = makeChapterKey(question);
+
+        if (!chapterMap.has(chapterKey)) {
+          chapterMap.set(chapterKey, {
+            chapter: question.chapter,
+            chapterTitle: question.chapterTitle
+          });
+        }
+      });
+
+      const chapters = [...chapterMap.values()].sort(function(a, b) {
+        return Number(a.chapter) - Number(b.chapter) || String(a.chapterTitle).localeCompare(String(b.chapterTitle), "ko");
+      });
+
+      chapterFilter.innerHTML = `<option value="all">전체 챕터</option>`;
+
+      chapters.forEach(function(chapterInfo) {
+        const option = document.createElement("option");
+        option.value = `${chapterInfo.chapter}__${chapterInfo.chapterTitle}`;
+        option.textContent = `${chapterInfo.chapter}장 ${chapterInfo.chapterTitle}`;
+        chapterFilter.appendChild(option);
+      });
+    }
+
+    /*
+      챕터 번호만 사용하면 다른 과목의 1장이 서로 섞일 수 있습니다.
+      그래서 chapter와 chapterTitle을 함께 묶어 비교합니다.
+    */
+    function makeChapterKey(question) {
+      return `${question.chapter}__${question.chapterTitle}`;
+    }
+
+    /*
+      현재 선택된 과목/챕터 조건에 맞는 문제만 골라냅니다.
+    */
+    function getFilteredQuestions() {
+      const selectedSubject = subjectFilter.value;
+      const selectedChapter = chapterFilter.value;
+      const selectedDisplayType = displayTypeFilter.value;
+
+      return allQuestions.filter(function(question) {
+        const subjectMatches = selectedSubject === "all" || question.subject === selectedSubject;
+        const chapterMatches = selectedChapter === "all" || makeChapterKey(question) === selectedChapter;
+        const questionDisplayType = question.displayType === "image" ? "image" : "text";
+        const displayTypeMatches = selectedDisplayType === "all" || questionDisplayType === selectedDisplayType;
+
+        return subjectMatches && chapterMatches && displayTypeMatches;
+      });
+    }
+
+    /*
+      JSON 파일을 불러오지 못했을 때 보여주는 오류 화면입니다.
+    */
+    function showLoadError() {
+      quizArea.innerHTML = `
+        <div class="error-box">문제 데이터를 불러오지 못했습니다</div>
+      `;
+
+      nextButton.disabled = true;
+      nextButton.textContent = "문제 데이터 없음";
+    }
+
+    /*
+      필터 조건에 맞는 문제가 하나도 없을 때 보여주는 안내입니다.
+    */
+    function showNoQuestionsMessage() {
+      questionCount.textContent = "0 / 0";
+      scoreCount.textContent = "정답 0개";
+      questionMeta.textContent = "";
+      questionText.className = "question";
+      questionText.textContent = "";
+      choicesArea.innerHTML = `<div class="empty-box">선택한 필터에 해당하는 문제가 없습니다.</div>`;
+      resultMessage.className = "result-message";
+      resultMessage.textContent = "";
+      explanationBox.className = "explanation";
+      explanationBox.textContent = "";
+      nextButton.disabled = true;
+      nextButton.textContent = "출제할 문제 없음";
+      filterSummary.textContent = "필터 조건에 맞는 문제: 0개";
+    }
+
+    /*
+      새 회차를 시작하는 함수입니다.
+      처음 시작할 때도, 처음부터 다시 풀기를 눌렀을 때도 이 함수가 실행됩니다.
+    */
+    function startNewRound() {
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      hasAnswered = false;
+
+      const filteredQuestions = getFilteredQuestions();
+      roundQuestions = pickRandomQuestions(filteredQuestions, QUESTIONS_PER_ROUND);
+
+      if (roundQuestions.length === 0) {
+        showNoQuestionsMessage();
+        return;
+      }
+
+      filterSummary.textContent = `필터 조건에 맞는 문제 ${filteredQuestions.length}개 중 ${roundQuestions.length}문제를 랜덤 출제합니다.`;
+      nextButton.textContent = "다음 문제";
+      nextButton.removeEventListener("click", startNewRound);
+      nextButton.addEventListener("click", goToNextQuestion);
+
+      showQuestion();
+    }
+
+    /*
+      전체 문제 목록에서 원하는 개수만큼 랜덤으로 뽑는 함수입니다.
+
+      중복을 막는 방법:
+      1. 원본 배열을 복사합니다.
+      2. 복사한 배열을 무작위 순서로 섞습니다.
+      3. 앞에서 필요한 개수만 잘라 씁니다.
+
+      원본 allQuestions는 그대로 두기 때문에 다시 풀 때도 안전합니다.
+    */
+    function pickRandomQuestions(questionList, maxCount) {
+      const copiedList = [...questionList];
+
+      /*
+        Fisher-Yates shuffle이라는 대표적인 배열 섞기 방식입니다.
+        뒤에서부터 하나씩 보면서 앞쪽의 랜덤 위치와 자리를 바꿉니다.
+      */
+      for (let i = copiedList.length - 1; i > 0; i = i - 1) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        const temporary = copiedList[i];
+        copiedList[i] = copiedList[randomIndex];
+        copiedList[randomIndex] = temporary;
+      }
+
+      const count = Math.min(maxCount, copiedList.length);
+      return copiedList.slice(0, count);
+    }
+
+    /*
+      현재 문제를 화면에 표시합니다.
+    */
+    function showQuestion() {
+      const currentQuestion = roundQuestions[currentQuestionIndex];
+      const totalRoundQuestions = roundQuestions.length;
+
+      hasAnswered = false;
+      nextButton.disabled = true;
+      nextButton.textContent = currentQuestionIndex === totalRoundQuestions - 1 ? "결과 보기" : "다음 문제";
+
+      questionCount.textContent = `${currentQuestionIndex + 1} / ${totalRoundQuestions}`;
+      scoreCount.textContent = `정답 ${correctCount}개`;
+      questionMeta.textContent = `${currentQuestion.exam} · ${currentQuestion.subject} · ${currentQuestion.chapter}장 ${currentQuestion.chapterTitle} · 난이도 ${currentQuestion.difficulty}`;
+      renderQuestion(currentQuestion);
+
+      resultMessage.className = "result-message";
+      resultMessage.textContent = "";
+      explanationBox.className = "explanation";
+      explanationBox.textContent = "";
+      choicesArea.innerHTML = "";
+
+      /*
+        answer는 questions_v3_explanation_images.json에서 1번, 2번, 3번처럼 사람이 보는 번호로 저장합니다.
+        그래서 정답 비교를 할 때는 index + 1과 비교합니다.
+      */
+      currentQuestion.choices.forEach(function(choiceText, index) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-button";
+        button.textContent = `${index + 1}. ${choiceText}`;
+
+        button.addEventListener("click", function() {
+          checkAnswer(index + 1);
+        });
+
+        choicesArea.appendChild(button);
+      });
+    }
+
+    /*
+      문제 본문을 표시하는 함수입니다.
+
+      표시 우선순위:
+      1. displayType이 "image"이고 questionImage가 있으면 이미지로 표시합니다.
+      2. questionHtml이 있으면 HTML로 렌더링합니다.
+      3. questionHtml이 없고 questionFormatted가 있으면 줄바꿈이 보이는 일반 텍스트로 표시합니다.
+      4. questionFormatted도 없으면 기존 question을 표시합니다.
+
+      questionHtml은 표(table)를 포함할 수 있으므로 innerHTML을 사용합니다.
+      이 데이터는 우리가 관리하는 JSON에서 온다는 전제로 렌더링합니다.
+    */
+    function renderQuestion(currentQuestion) {
+      const displayType = currentQuestion.displayType;
+      const questionImage = currentQuestion.questionImage;
+      const questionHtml = currentQuestion.questionHtml;
+      const questionFormatted = currentQuestion.questionFormatted;
+      const question = currentQuestion.question;
+
+      if (displayType === "image" && questionImage) {
+        questionText.className = "question question-image";
+        questionText.innerHTML = "";
+
+        const image = document.createElement("img");
+        image.src = normalizeImagePath(questionImage);
+        image.alt = question || "문제 이미지";
+        image.loading = "lazy";
+        image.onerror = function() {
+          questionText.innerHTML = `<div class="image-error">문제 이미지를 불러오지 못했습니다.</div>`;
+        };
+
+        questionText.appendChild(image);
+        return;
+      }
+
+      if (displayType === "text") {
+        questionText.className = "question";
+        questionText.textContent = questionFormatted || question || "";
+        return;
+      }
+
+      if (questionHtml) {
+        questionText.className = "question question-html";
+        questionText.innerHTML = questionHtml;
+        wrapQuestionTables();
+        return;
+      }
+
+      questionText.className = "question";
+      questionText.textContent = questionFormatted || question || "";
+    }
+
+    /*
+      JSON의 이미지 경로가 폴더/파일 형태가 아니라 폴더-파일 형태로 들어온 경우가 있어
+      브라우저가 실제 폴더에서 이미지를 찾을 수 있도록 보정합니다.
+    */
+    function normalizeImagePath(path) {
+      if (!path) {
+        return "";
+      }
+
+      return path
+        .replace("question_images-", "question_images/")
+        .replace("explanation_images-", "explanation_images/");
+    }
+
+    /*
+      questionHtml 안에 table이 들어 있을 때 모바일에서 화면을 밀어내지 않도록
+      table을 .table-wrap div로 감쌉니다. 이 div에는 가로 스크롤 CSS가 적용되어 있습니다.
+    */
+    function wrapQuestionTables() {
+      const tables = questionText.querySelectorAll("table");
+
+      tables.forEach(function(table) {
+        if (table.parentElement && table.parentElement.classList.contains("table-wrap")) {
+          return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrap";
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+    }
+
+    /*
+      사용자가 선택한 보기가 정답인지 확인합니다.
+      selectedAnswer는 1, 2, 3, 4, 5 중 하나입니다.
+    */
+    function checkAnswer(selectedAnswer) {
+      if (hasAnswered) {
+        return;
+      }
+
+      hasAnswered = true;
+      nextButton.disabled = false;
+
+      const currentQuestion = roundQuestions[currentQuestionIndex];
+      const isCorrect = selectedAnswer === currentQuestion.answer;
+      const allChoiceButtons = document.querySelectorAll(".choice-button");
+
+      if (isCorrect) {
+        correctCount = correctCount + 1;
+        resultMessage.className = "result-message correct";
+        resultMessage.textContent = "정답입니다.";
+      } else {
+        resultMessage.className = "result-message wrong";
+        resultMessage.textContent = "오답입니다.";
+      }
+
+      scoreCount.textContent = `정답 ${correctCount}개`;
+
+      allChoiceButtons.forEach(function(button, index) {
+        const choiceNumber = index + 1;
+
+        button.disabled = true;
+
+        if (choiceNumber === currentQuestion.answer) {
+          button.classList.add("correct");
+        }
+
+        if (choiceNumber === selectedAnswer && !isCorrect) {
+          button.classList.add("wrong");
+        }
+      });
+
+      renderExplanation(currentQuestion);
+    }
+
+    /*
+      해설을 표시하는 함수입니다.
+
+      표시 우선순위:
+      1. explanationDisplayType이 "image"이고 explanationImage가 있으면 해설 이미지로 표시합니다.
+      2. 해설 이미지 로딩에 실패하면 오류 문구와 해설 텍스트를 함께 보여줍니다.
+      3. explanationDisplayType이 "text"이면 기존 해설 텍스트를 보여줍니다.
+    */
+    function renderExplanation(currentQuestion) {
+      const explanationDisplayType = currentQuestion.explanationDisplayType;
+      const explanationImage = currentQuestion.explanationImage;
+      const explanationText = currentQuestion.explanationFormatted || currentQuestion.explanation || "";
+
+      explanationBox.className = "explanation show";
+
+      if (explanationDisplayType === "image" && explanationImage) {
+        explanationBox.className = "explanation explanation-image show";
+        explanationBox.innerHTML = "";
+
+        const image = document.createElement("img");
+        image.src = normalizeImagePath(explanationImage);
+        image.alt = explanationText || "해설 이미지";
+        image.loading = "lazy";
+        image.onerror = function() {
+          explanationBox.className = "explanation show";
+          explanationBox.innerHTML = "";
+
+          const message = document.createElement("div");
+          message.className = "image-error";
+          message.textContent = "해설 이미지를 불러오지 못했습니다.";
+          explanationBox.appendChild(message);
+
+          if (explanationText) {
+            const fallback = document.createElement("div");
+            fallback.textContent = `해설: ${explanationText}`;
+            explanationBox.appendChild(fallback);
+          }
+        };
+
+        explanationBox.appendChild(image);
+        return;
+      }
+
+      explanationBox.textContent = `해설: ${explanationText}`;
+    }
+
+    /*
+      다음 문제로 넘어갑니다.
+      현재 문제가 마지막이면 결과 화면으로 이동합니다.
+    */
+    function goToNextQuestion() {
+      currentQuestionIndex = currentQuestionIndex + 1;
+
+      if (currentQuestionIndex < roundQuestions.length) {
+        showQuestion();
+      } else {
+        showFinalScore();
+      }
+    }
+
+    /*
+      결과 화면입니다.
+      요구사항대로 총 문제 수, 정답 수, 정답률을 모두 보여줍니다.
+    */
+    function showFinalScore() {
+      const totalQuestions = roundQuestions.length;
+      const percentage = Math.round((correctCount / totalQuestions) * 100);
+
+      questionMeta.textContent = "회차가 종료되었습니다.";
+      questionText.className = "question";
+      questionText.textContent = "";
+      choicesArea.innerHTML = "";
+      resultMessage.className = "result-message";
+      resultMessage.textContent = "";
+      explanationBox.className = "explanation";
+      explanationBox.textContent = "";
+
+      questionCount.textContent = `${totalQuestions} / ${totalQuestions}`;
+      scoreCount.textContent = `정답 ${correctCount}개`;
+
+      choicesArea.innerHTML = `
+        <div class="score-box">
+          <p class="question">시험 결과</p>
+          <div class="score-number">${percentage}%</div>
+          <p class="score-detail">
+            총 문제 수: ${totalQuestions}문제<br>
+            정답 수: ${correctCount}문제<br>
+            정답률: ${percentage}%
+          </p>
+        </div>
+      `;
+
+      nextButton.textContent = "처음부터 다시 풀기";
+      nextButton.disabled = false;
+      nextButton.removeEventListener("click", goToNextQuestion);
+      nextButton.addEventListener("click", startNewRound);
+    }
+
+    loginForm.addEventListener("submit", handleLogin);
+    logoutButton.addEventListener("click", handleLogout);
+
+    /*
+      페이지가 열리면 가장 먼저 로그인 상태를 확인합니다.
+      로그인 성공 전에는 questions_v3_explanation_images.json을 불러오지 않습니다.
+    */
+    showScreenForLoginState();
+  </script>
+</body>
+</html>
