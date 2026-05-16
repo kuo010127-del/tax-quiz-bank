@@ -9,7 +9,6 @@
       --nts-navy: #013762;
       --nts-red: #E3062F;
       --nts-gray: #59595A;
-      --nts-sub-gray: #CDC8CB;
       --nts-light-gray: #F3F6FA;
       --nts-border: #D8E0EA;
       --nts-white: #FFFFFF;
@@ -62,7 +61,7 @@
 
     .card {
       width: 100%;
-      max-width: 760px;
+      max-width: 900px;
       margin: 0 auto;
       background: var(--nts-white);
       border: 1px solid var(--nts-border);
@@ -257,6 +256,13 @@
       letter-spacing: 0;
     }
 
+    .top-brand p {
+      margin: 3px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .logout-button,
     .back-button {
       flex: 0 0 auto;
@@ -285,6 +291,67 @@
       margin: 0 0 18px;
       color: var(--nts-gray);
       line-height: 1.6;
+    }
+
+    .panel {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--nts-border);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      color: var(--nts-navy);
+      font-size: 17px;
+    }
+
+    .stats-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card {
+      padding: 14px;
+      border: 1px solid var(--nts-border);
+      border-radius: 10px;
+      background: var(--nts-white);
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--nts-gray);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--nts-navy);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .subject-summary {
+      display: grid;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .subject-summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--nts-border);
+      border-radius: 8px;
+      background: var(--nts-white);
+      color: var(--nts-gray);
+      font-weight: 800;
     }
 
     .summary-box {
@@ -543,6 +610,10 @@
       .quick-actions {
         grid-template-columns: repeat(3, 1fr);
       }
+
+      .admin-filter-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     @media (max-width: 520px) {
@@ -569,6 +640,10 @@
 
       .content {
         padding: 18px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
       }
 
       .top-bar,
@@ -625,52 +700,132 @@
       </div>
     </section>
 
-    <section class="page" id="mainPage">
+    <section class="page" id="adminPage">
       <div class="card">
         <header class="top-bar">
           <div class="top-brand">
             <img class="top-logo" src="assets/logo.png" alt="국세청 로고">
-            <h1>국세청 내부자격시험 문제은행</h1>
+            <div>
+              <h1>관리자 페이지</h1>
+              <p id="adminWelcome">문제 데이터 검수</p>
+            </div>
           </div>
-          <button class="logout-button" id="mainLogoutButton" type="button">로그아웃</button>
+          <button class="logout-button" id="adminLogoutButton" type="button">로그아웃</button>
         </header>
 
         <div class="content">
-          <h2 class="main-title">퀴즈 설정</h2>
-          <p class="main-subtitle">과목과 챕터를 고른 뒤 원하는 문항 수로 퀴즈를 시작하세요.</p>
+          <h2 class="main-title">검수 대시보드</h2>
+          <p class="main-subtitle">JSON을 수정하지 않고 조건에 맞는 문제를 찾아 퀴즈 화면에서 확인합니다.</p>
 
-          <div class="control-grid">
-            <div class="field">
-              <label for="subjectFilter">세법 선택</label>
-              <select id="subjectFilter" disabled>
-                <option value="all">전체 과목</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="chapterFilter">챕터 선택</label>
-              <select id="chapterFilter" disabled>
-                <option value="all">전체 챕터</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="questionCountSelect">출제 문항 수</label>
-              <select id="questionCountSelect" disabled>
-                <option value="10">10문제</option>
-                <option value="20" selected>20문제</option>
-                <option value="30">30문제</option>
-                <option value="all">전체</option>
-              </select>
-            </div>
+          <div class="stats-grid">
+            <div class="stat-card"><span>전체 문제 수</span><strong id="adminTotalCount">0</strong></div>
+            <div class="stat-card"><span>이미지 문제 수</span><strong id="adminImageCount">0</strong></div>
+            <div class="stat-card"><span>해설 이미지 문제 수</span><strong id="adminExplanationImageCount">0</strong></div>
+            <div class="stat-card"><span>현재 필터 문제 수</span><strong id="adminFilteredCount">0</strong></div>
           </div>
 
-          <div class="summary-box" id="filterSummary">문제 데이터를 불러오는 중입니다.</div>
+          <div class="panel">
+            <h3>과목별 문제 수</h3>
+            <div class="subject-summary" id="adminSubjectSummary"></div>
+          </div>
+
+          <div class="panel">
+            <h3>검수 필터</h3>
+            <div class="control-grid admin-filter-grid">
+              <div class="field">
+                <label for="adminSubjectFilter">과목 필터</label>
+                <select id="adminSubjectFilter" disabled><option value="all">전체 과목</option></select>
+              </div>
+              <div class="field">
+                <label for="adminChapterFilter">챕터 필터</label>
+                <select id="adminChapterFilter" disabled><option value="all">전체 챕터</option></select>
+              </div>
+              <div class="field">
+                <label for="adminDisplayFilter">표시 방식 필터</label>
+                <select id="adminDisplayFilter" disabled>
+                  <option value="all">전체</option>
+                  <option value="text">텍스트 문제</option>
+                  <option value="image">이미지 문제</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adminExplanationFilter">해설 표시 방식 필터</label>
+                <select id="adminExplanationFilter" disabled>
+                  <option value="all">전체</option>
+                  <option value="text">텍스트 해설</option>
+                  <option value="image">이미지 해설</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adminSearchInput">문제번호 또는 originalId 검색</label>
+                <input id="adminSearchInput" type="search" placeholder="예: 47 또는 조사요원-국세기본법-47" disabled>
+              </div>
+            </div>
+
+            <div class="quick-actions">
+              <button class="primary-button" id="adminReviewStartButton" type="button" disabled>관리자 검수용 퀴즈 시작</button>
+              <button class="secondary-button" id="adminImageReviewButton" type="button" disabled>이미지 문제만 검수</button>
+              <button class="danger-button" id="adminExplanationImageReviewButton" type="button" disabled>해설 이미지 문제만 검수</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="userPage">
+      <div class="card">
+        <header class="top-bar">
+          <div class="top-brand">
+            <img class="top-logo" src="assets/logo.png" alt="국세청 로고">
+            <div>
+              <h1>학습 페이지</h1>
+              <p id="userWelcome">문제 풀이를 시작하세요</p>
+            </div>
+          </div>
+          <button class="logout-button" id="userLogoutButton" type="button">로그아웃</button>
+        </header>
+
+        <div class="content">
+          <h2 class="main-title">오늘의 학습</h2>
+          <p class="main-subtitle">빠른 시작 또는 원하는 범위를 선택해 문제를 풀 수 있습니다.</p>
 
           <div class="quick-actions">
-            <button class="primary-button" id="startSelectedButton" type="button" disabled>선택 범위로 퀴즈 시작</button>
-            <button class="secondary-button" id="quickStartButton" type="button" disabled>전체 랜덤 20문제</button>
-            <button class="danger-button" id="imageReviewButton" type="button" disabled>이미지 문제만 검수</button>
+            <button class="primary-button" id="userQuickStartButton" type="button" disabled>전체 랜덤 20문제 시작</button>
+            <button class="secondary-button" id="userAllSequentialButton" type="button" disabled>전체 문제 순서대로 풀기</button>
+          </div>
+
+          <div class="panel">
+            <h3>선택 학습</h3>
+            <div class="control-grid">
+              <div class="field">
+                <label for="userSubjectFilter">과목 선택</label>
+                <select id="userSubjectFilter" disabled><option value="all">전체 과목</option></select>
+              </div>
+              <div class="field">
+                <label for="userChapterFilter">챕터 선택</label>
+                <select id="userChapterFilter" disabled><option value="all">전체 챕터</option></select>
+              </div>
+              <div class="field">
+                <label for="userOrderSelect">출제 방식 선택</label>
+                <select id="userOrderSelect" disabled>
+                  <option value="random">랜덤</option>
+                  <option value="sequential">순차</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="userCountSelect">문항 수 선택</label>
+                <select id="userCountSelect" disabled>
+                  <option value="10">10문제</option>
+                  <option value="20" selected>20문제</option>
+                  <option value="30">30문제</option>
+                  <option value="all">전체</option>
+                </select>
+              </div>
+            </div>
+            <div class="summary-box" id="userFilterSummary">문제 데이터를 불러오는 중입니다.</div>
+            <div class="quick-actions">
+              <button class="primary-button" id="userStartSelectedButton" type="button" disabled>선택 범위로 퀴즈 시작</button>
+            </div>
           </div>
         </div>
       </div>
@@ -679,8 +834,8 @@
     <section class="page" id="quizPage">
       <div class="card quiz-card">
         <header class="quiz-top">
-          <button class="back-button" id="backToMainButton" type="button">뒤로가기</button>
-          <h1>퀴즈 풀이</h1>
+          <button class="back-button" id="backButton" type="button">뒤로가기</button>
+          <h1 id="quizTitle">퀴즈 풀이</h1>
         </header>
 
         <div class="content">
@@ -705,10 +860,13 @@
 
   <script>
     const USERS = [
-      { username: "admin", password: "1234" }
+      { username: "admin", password: "1234", role: "admin" },
+      { username: "user1", password: "1234", role: "user" }
     ];
 
-    const LOGIN_SESSION_KEY = "quizBankLoggedIn";
+    const LOGIN_KEY = "quizBankLoggedIn";
+    const USERNAME_KEY = "quizBankUsername";
+    const ROLE_KEY = "quizBankRole";
     const DATA_FILE = "./questions_v3_explanation_images.json";
     const DEFAULT_ROUND_COUNT = 20;
 
@@ -717,24 +875,48 @@
     let currentQuestionIndex = 0;
     let correctCount = 0;
     let hasAnswered = false;
-    let currentMode = "all";
+    let quizReturnPage = "user";
+    let lastQuizSource = [];
+    let lastQuizOptions = { order: "random", count: DEFAULT_ROUND_COUNT };
 
     const loginPage = document.getElementById("loginPage");
-    const mainPage = document.getElementById("mainPage");
+    const adminPage = document.getElementById("adminPage");
+    const userPage = document.getElementById("userPage");
     const quizPage = document.getElementById("quizPage");
     const loginForm = document.getElementById("loginForm");
     const usernameInput = document.getElementById("usernameInput");
     const passwordInput = document.getElementById("passwordInput");
     const loginError = document.getElementById("loginError");
-    const mainLogoutButton = document.getElementById("mainLogoutButton");
-    const subjectFilter = document.getElementById("subjectFilter");
-    const chapterFilter = document.getElementById("chapterFilter");
-    const questionCountSelect = document.getElementById("questionCountSelect");
-    const filterSummary = document.getElementById("filterSummary");
-    const startSelectedButton = document.getElementById("startSelectedButton");
-    const quickStartButton = document.getElementById("quickStartButton");
-    const imageReviewButton = document.getElementById("imageReviewButton");
-    const backToMainButton = document.getElementById("backToMainButton");
+    const adminWelcome = document.getElementById("adminWelcome");
+    const userWelcome = document.getElementById("userWelcome");
+    const adminLogoutButton = document.getElementById("adminLogoutButton");
+    const userLogoutButton = document.getElementById("userLogoutButton");
+
+    const adminTotalCount = document.getElementById("adminTotalCount");
+    const adminImageCount = document.getElementById("adminImageCount");
+    const adminExplanationImageCount = document.getElementById("adminExplanationImageCount");
+    const adminFilteredCount = document.getElementById("adminFilteredCount");
+    const adminSubjectSummary = document.getElementById("adminSubjectSummary");
+    const adminSubjectFilter = document.getElementById("adminSubjectFilter");
+    const adminChapterFilter = document.getElementById("adminChapterFilter");
+    const adminDisplayFilter = document.getElementById("adminDisplayFilter");
+    const adminExplanationFilter = document.getElementById("adminExplanationFilter");
+    const adminSearchInput = document.getElementById("adminSearchInput");
+    const adminReviewStartButton = document.getElementById("adminReviewStartButton");
+    const adminImageReviewButton = document.getElementById("adminImageReviewButton");
+    const adminExplanationImageReviewButton = document.getElementById("adminExplanationImageReviewButton");
+
+    const userSubjectFilter = document.getElementById("userSubjectFilter");
+    const userChapterFilter = document.getElementById("userChapterFilter");
+    const userOrderSelect = document.getElementById("userOrderSelect");
+    const userCountSelect = document.getElementById("userCountSelect");
+    const userFilterSummary = document.getElementById("userFilterSummary");
+    const userQuickStartButton = document.getElementById("userQuickStartButton");
+    const userAllSequentialButton = document.getElementById("userAllSequentialButton");
+    const userStartSelectedButton = document.getElementById("userStartSelectedButton");
+
+    const backButton = document.getElementById("backButton");
+    const quizTitle = document.getElementById("quizTitle");
     const questionCount = document.getElementById("questionCount");
     const scoreCount = document.getElementById("scoreCount");
     const questionMeta = document.getElementById("questionMeta");
@@ -746,21 +928,40 @@
 
     function showPage(pageName) {
       loginPage.classList.toggle("active", pageName === "login");
-      mainPage.classList.toggle("active", pageName === "main");
+      adminPage.classList.toggle("active", pageName === "admin");
+      userPage.classList.toggle("active", pageName === "user");
       quizPage.classList.toggle("active", pageName === "quiz");
     }
 
     function isLoggedIn() {
-      return sessionStorage.getItem(LOGIN_SESSION_KEY) === "true";
+      return sessionStorage.getItem(LOGIN_KEY) === "true";
+    }
+
+    function getCurrentRole() {
+      return sessionStorage.getItem(ROLE_KEY) || "";
+    }
+
+    function getCurrentUsername() {
+      return sessionStorage.getItem(USERNAME_KEY) || "";
     }
 
     function showScreenForLoginState() {
-      if (isLoggedIn()) {
-        showPage("main");
-        loadQuestionsIfNeeded();
-      } else {
+      if (!isLoggedIn()) {
         showPage("login");
         usernameInput.focus();
+        return;
+      }
+
+      loadQuestionsIfNeeded();
+      const role = getCurrentRole();
+      const username = getCurrentUsername();
+
+      if (role === "admin") {
+        adminWelcome.textContent = `${username} · 관리자 검수`;
+        showPage("admin");
+      } else {
+        userWelcome.textContent = `${username} · 학습 모드`;
+        showPage("user");
       }
     }
 
@@ -780,20 +981,24 @@
         return;
       }
 
-      sessionStorage.setItem(LOGIN_SESSION_KEY, "true");
+      sessionStorage.setItem(LOGIN_KEY, "true");
+      sessionStorage.setItem(USERNAME_KEY, matchedUser.username);
+      sessionStorage.setItem(ROLE_KEY, matchedUser.role);
       loginError.classList.remove("show");
       passwordInput.value = "";
       showScreenForLoginState();
     }
 
     function handleLogout() {
-      sessionStorage.removeItem(LOGIN_SESSION_KEY);
+      sessionStorage.removeItem(LOGIN_KEY);
+      sessionStorage.removeItem(USERNAME_KEY);
+      sessionStorage.removeItem(ROLE_KEY);
       window.location.reload();
     }
 
     async function loadQuestionsIfNeeded() {
       if (allQuestions.length > 0) {
-        updateMainSummary();
+        refreshCurrentRoleView();
         return;
       }
 
@@ -815,33 +1020,52 @@
         }
 
         allQuestions = data;
-        setupMainControls();
-        updateMainSummary();
+        setupControls();
+        renderAdminStats();
+        updateAdminSummary();
+        updateUserSummary();
       } catch (error) {
-        filterSummary.innerHTML = `<div class="load-error">문제 데이터를 불러오지 못했습니다.</div>`;
+        userFilterSummary.innerHTML = `<div class="load-error">문제 데이터를 불러오지 못했습니다.</div>`;
       }
     }
 
-    function setupMainControls() {
-      const subjects = getUniqueValues(allQuestions, "subject");
+    function setupControls() {
+      populateSubjectSelect(adminSubjectFilter);
+      populateSubjectSelect(userSubjectFilter);
+      updateChapterOptions(adminSubjectFilter, adminChapterFilter);
+      updateChapterOptions(userSubjectFilter, userChapterFilter);
 
-      subjectFilter.innerHTML = `<option value="all">전체 과목</option>`;
+      [
+        adminSubjectFilter,
+        adminChapterFilter,
+        adminDisplayFilter,
+        adminExplanationFilter,
+        adminSearchInput,
+        adminReviewStartButton,
+        adminImageReviewButton,
+        adminExplanationImageReviewButton,
+        userSubjectFilter,
+        userChapterFilter,
+        userOrderSelect,
+        userCountSelect,
+        userQuickStartButton,
+        userAllSequentialButton,
+        userStartSelectedButton
+      ].forEach(function(element) {
+        element.disabled = false;
+      });
+    }
+
+    function populateSubjectSelect(selectElement) {
+      const subjects = getUniqueValues(allQuestions, "subject");
+      selectElement.innerHTML = `<option value="all">전체 과목</option>`;
 
       subjects.forEach(function(subject) {
         const option = document.createElement("option");
         option.value = subject;
         option.textContent = subject;
-        subjectFilter.appendChild(option);
+        selectElement.appendChild(option);
       });
-
-      subjectFilter.disabled = false;
-      chapterFilter.disabled = false;
-      questionCountSelect.disabled = false;
-      startSelectedButton.disabled = false;
-      quickStartButton.disabled = false;
-      imageReviewButton.disabled = false;
-
-      updateChapterOptions();
     }
 
     function getUniqueValues(questionList, key) {
@@ -858,8 +1082,8 @@
         });
     }
 
-    function updateChapterOptions() {
-      const selectedSubject = subjectFilter.value;
+    function updateChapterOptions(subjectSelect, chapterSelect) {
+      const selectedSubject = subjectSelect.value;
       const questionsForSubject = selectedSubject === "all"
         ? allQuestions
         : allQuestions.filter(function(question) {
@@ -883,13 +1107,13 @@
         return Number(a.chapter) - Number(b.chapter) || String(a.chapterTitle).localeCompare(String(b.chapterTitle), "ko");
       });
 
-      chapterFilter.innerHTML = `<option value="all">전체 챕터</option>`;
+      chapterSelect.innerHTML = `<option value="all">전체 챕터</option>`;
 
       chapters.forEach(function(chapterInfo) {
         const option = document.createElement("option");
         option.value = `${chapterInfo.chapter}__${chapterInfo.chapterTitle}`;
         option.textContent = `${chapterInfo.chapter}장 ${chapterInfo.chapterTitle}`;
-        chapterFilter.appendChild(option);
+        chapterSelect.appendChild(option);
       });
     }
 
@@ -897,77 +1121,122 @@
       return `${question.chapter}__${question.chapterTitle}`;
     }
 
-    function getFilteredQuestions(mode) {
-      const selectedSubject = subjectFilter.value;
-      const selectedChapter = chapterFilter.value;
-      const selectedMode = mode || currentMode;
+    function getQuestionDisplayType(question) {
+      return question.displayType === "image" && question.questionImage ? "image" : "text";
+    }
+
+    function getExplanationDisplayType(question) {
+      return question.explanationDisplayType === "image" && question.explanationImage ? "image" : "text";
+    }
+
+    function getAdminFilteredQuestions(extra) {
+      const selectedSubject = adminSubjectFilter.value;
+      const selectedChapter = adminChapterFilter.value;
+      const selectedDisplay = extra && extra.display ? extra.display : adminDisplayFilter.value;
+      const selectedExplanation = extra && extra.explanation ? extra.explanation : adminExplanationFilter.value;
+      const searchText = adminSearchInput.value.trim().toLowerCase();
 
       return allQuestions.filter(function(question) {
         const subjectMatches = selectedSubject === "all" || question.subject === selectedSubject;
         const chapterMatches = selectedChapter === "all" || makeChapterKey(question) === selectedChapter;
-        const imageMatches = selectedMode !== "image" || (question.displayType === "image" && question.questionImage);
+        const displayMatches = selectedDisplay === "all" || getQuestionDisplayType(question) === selectedDisplay;
+        const explanationMatches = selectedExplanation === "all" || getExplanationDisplayType(question) === selectedExplanation;
+        const searchMatches = !searchText ||
+          String(question.id || "").toLowerCase().includes(searchText) ||
+          String(question.originalId || "").toLowerCase().includes(searchText);
 
-        return subjectMatches && chapterMatches && imageMatches;
+        return subjectMatches && chapterMatches && displayMatches && explanationMatches && searchMatches;
       });
     }
 
-    function getSelectedQuestionLimit() {
-      const value = questionCountSelect.value;
+    function getUserFilteredQuestions() {
+      const selectedSubject = userSubjectFilter.value;
+      const selectedChapter = userChapterFilter.value;
 
-      if (value === "all") {
-        return "all";
-      }
+      return allQuestions.filter(function(question) {
+        const subjectMatches = selectedSubject === "all" || question.subject === selectedSubject;
+        const chapterMatches = selectedChapter === "all" || makeChapterKey(question) === selectedChapter;
 
-      return Number(value);
+        return subjectMatches && chapterMatches;
+      });
     }
 
-    function updateMainSummary() {
-      const filteredQuestions = getFilteredQuestions(currentMode);
-      const imageCount = filteredQuestions.filter(function(question) {
-        return question.displayType === "image" && question.questionImage;
+    function renderAdminStats() {
+      const imageCount = allQuestions.filter(function(question) {
+        return getQuestionDisplayType(question) === "image";
       }).length;
-      const textCount = filteredQuestions.length - imageCount;
+      const explanationImageCount = allQuestions.filter(function(question) {
+        return getExplanationDisplayType(question) === "image";
+      }).length;
+      const subjectCounts = new Map();
 
-      filterSummary.textContent = `현재 선택 조건에 맞는 문제: ${filteredQuestions.length}개 · 텍스트 ${textCount}개 · 이미지 ${imageCount}개`;
+      allQuestions.forEach(function(question) {
+        subjectCounts.set(question.subject, (subjectCounts.get(question.subject) || 0) + 1);
+      });
+
+      adminTotalCount.textContent = allQuestions.length;
+      adminImageCount.textContent = imageCount;
+      adminExplanationImageCount.textContent = explanationImageCount;
+      adminSubjectSummary.innerHTML = [...subjectCounts.entries()]
+        .sort(function(a, b) {
+          return String(a[0]).localeCompare(String(b[0]), "ko");
+        })
+        .map(function(entry) {
+          return `<div class="subject-summary-row"><span>${escapeHtml(entry[0])}</span><strong>${entry[1]}문제</strong></div>`;
+        })
+        .join("");
     }
 
-    function startQuizFromSelection() {
-      currentMode = "all";
-      startQuiz(getFilteredQuestions("all"), getSelectedQuestionLimit());
+    function updateAdminSummary() {
+      adminFilteredCount.textContent = getAdminFilteredQuestions().length;
     }
 
-    function startQuickQuiz() {
-      currentMode = "all";
-      subjectFilter.value = "all";
-      updateChapterOptions();
-      chapterFilter.value = "all";
-      questionCountSelect.value = "20";
-      updateMainSummary();
-      startQuiz(getFilteredQuestions("all"), DEFAULT_ROUND_COUNT);
+    function updateUserSummary() {
+      const count = getUserFilteredQuestions().length;
+      userFilterSummary.textContent = `현재 선택 조건에 맞는 문제: ${count}개`;
     }
 
-    function startImageReviewQuiz() {
-      currentMode = "image";
-      questionCountSelect.value = "20";
-      updateMainSummary();
-      startQuiz(getFilteredQuestions("image"), getSelectedQuestionLimit());
-    }
-
-    function startQuiz(sourceQuestions, limit) {
-      const count = limit === "all" ? sourceQuestions.length : limit;
-      roundQuestions = pickRandomQuestions(sourceQuestions, count);
-      currentQuestionIndex = 0;
-      correctCount = 0;
-      hasAnswered = false;
-
-      if (roundQuestions.length === 0) {
-        filterSummary.innerHTML = `<div class="empty-box">선택한 조건에 해당하는 문제가 없습니다.</div>`;
-        showPage("main");
-        return;
+    function refreshCurrentRoleView() {
+      if (getCurrentRole() === "admin") {
+        renderAdminStats();
+        updateAdminSummary();
+      } else {
+        updateUserSummary();
       }
+    }
 
-      showPage("quiz");
-      showQuestion();
+    function getSelectedCount(selectElement) {
+      return selectElement.value === "all" ? "all" : Number(selectElement.value);
+    }
+
+    function sortQuestionsSequentially(questionList, includeSubject) {
+      return [...questionList].sort(function(a, b) {
+        if (includeSubject) {
+          const subjectCompare = String(a.subject).localeCompare(String(b.subject), "ko");
+
+          if (subjectCompare !== 0) {
+            return subjectCompare;
+          }
+        }
+
+        const aOriginal = Number(a.originalId);
+        const bOriginal = Number(b.originalId);
+
+        if (!Number.isNaN(aOriginal) && !Number.isNaN(bOriginal) && aOriginal !== bOriginal) {
+          return aOriginal - bOriginal;
+        }
+
+        return String(a.id).localeCompare(String(b.id), "ko");
+      });
+    }
+
+    function prepareQuizQuestions(sourceQuestions, options) {
+      const count = options.count === "all" ? sourceQuestions.length : options.count;
+      const orderedQuestions = options.order === "sequential"
+        ? sortQuestionsSequentially(sourceQuestions, options.includeSubject)
+        : pickRandomQuestions(sourceQuestions, sourceQuestions.length);
+
+      return orderedQuestions.slice(0, Math.min(count, orderedQuestions.length));
     }
 
     function pickRandomQuestions(questionList, maxCount) {
@@ -980,8 +1249,84 @@
         copiedList[randomIndex] = temporary;
       }
 
-      const count = Math.min(maxCount, copiedList.length);
-      return copiedList.slice(0, count);
+      return copiedList.slice(0, Math.min(maxCount, copiedList.length));
+    }
+
+    function startQuiz(sourceQuestions, options) {
+      lastQuizSource = [...sourceQuestions];
+      lastQuizOptions = { ...options };
+      roundQuestions = prepareQuizQuestions(sourceQuestions, options);
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      hasAnswered = false;
+      quizReturnPage = options.returnPage;
+
+      if (roundQuestions.length === 0) {
+        const target = options.returnPage === "admin" ? adminFilteredCount : userFilterSummary;
+
+        if (target === adminFilteredCount) {
+          adminFilteredCount.textContent = "0";
+        } else {
+          target.innerHTML = `<div class="empty-box">선택한 조건에 해당하는 문제가 없습니다.</div>`;
+        }
+        showPage(options.returnPage);
+        return;
+      }
+
+      quizTitle.textContent = options.title || "퀴즈 풀이";
+      showPage("quiz");
+      showQuestion();
+    }
+
+    function startAdminReview(extra) {
+      const questions = getAdminFilteredQuestions(extra);
+      startQuiz(questions, {
+        order: "sequential",
+        count: "all",
+        includeSubject: true,
+        returnPage: "admin",
+        title: "관리자 검수"
+      });
+    }
+
+    function startUserSelectedQuiz() {
+      startQuiz(getUserFilteredQuestions(), {
+        order: userOrderSelect.value,
+        count: getSelectedCount(userCountSelect),
+        includeSubject: userSubjectFilter.value === "all",
+        returnPage: "user",
+        title: "선택 학습"
+      });
+    }
+
+    function startUserQuickQuiz() {
+      userSubjectFilter.value = "all";
+      updateChapterOptions(userSubjectFilter, userChapterFilter);
+      userChapterFilter.value = "all";
+      userOrderSelect.value = "random";
+      userCountSelect.value = "20";
+      updateUserSummary();
+      startQuiz(getUserFilteredQuestions(), {
+        order: "random",
+        count: 20,
+        includeSubject: true,
+        returnPage: "user",
+        title: "전체 랜덤 20문제"
+      });
+    }
+
+    function startUserAllSequentialQuiz() {
+      userSubjectFilter.value = "all";
+      updateChapterOptions(userSubjectFilter, userChapterFilter);
+      userChapterFilter.value = "all";
+      updateUserSummary();
+      startQuiz(allQuestions, {
+        order: "sequential",
+        count: "all",
+        includeSubject: true,
+        returnPage: "user",
+        title: "전체 순차 풀이"
+      });
     }
 
     function showQuestion() {
@@ -1200,14 +1545,14 @@
 
     function restartCurrentQuiz() {
       nextButton.addEventListener("click", goToNextQuestion);
-      startQuiz(roundQuestions, roundQuestions.length);
+      startQuiz(lastQuizSource, lastQuizOptions);
     }
 
-    function goBackToMain() {
+    function goBack() {
       nextButton.removeEventListener("click", restartCurrentQuiz);
       nextButton.addEventListener("click", goToNextQuestion);
-      updateMainSummary();
-      showPage("main");
+      refreshCurrentRoleView();
+      showPage(quizReturnPage);
     }
 
     function escapeHtml(value) {
@@ -1220,21 +1565,36 @@
     }
 
     loginForm.addEventListener("submit", handleLogin);
-    mainLogoutButton.addEventListener("click", handleLogout);
-    subjectFilter.addEventListener("change", function() {
-      currentMode = "all";
-      updateChapterOptions();
-      updateMainSummary();
+    adminLogoutButton.addEventListener("click", handleLogout);
+    userLogoutButton.addEventListener("click", handleLogout);
+    adminSubjectFilter.addEventListener("change", function() {
+      updateChapterOptions(adminSubjectFilter, adminChapterFilter);
+      updateAdminSummary();
     });
-    chapterFilter.addEventListener("change", function() {
-      currentMode = "all";
-      updateMainSummary();
+    adminChapterFilter.addEventListener("change", updateAdminSummary);
+    adminDisplayFilter.addEventListener("change", updateAdminSummary);
+    adminExplanationFilter.addEventListener("change", updateAdminSummary);
+    adminSearchInput.addEventListener("input", updateAdminSummary);
+    adminReviewStartButton.addEventListener("click", function() {
+      startAdminReview();
     });
-    questionCountSelect.addEventListener("change", updateMainSummary);
-    startSelectedButton.addEventListener("click", startQuizFromSelection);
-    quickStartButton.addEventListener("click", startQuickQuiz);
-    imageReviewButton.addEventListener("click", startImageReviewQuiz);
-    backToMainButton.addEventListener("click", goBackToMain);
+    adminImageReviewButton.addEventListener("click", function() {
+      startAdminReview({ display: "image" });
+    });
+    adminExplanationImageReviewButton.addEventListener("click", function() {
+      startAdminReview({ explanation: "image" });
+    });
+    userSubjectFilter.addEventListener("change", function() {
+      updateChapterOptions(userSubjectFilter, userChapterFilter);
+      updateUserSummary();
+    });
+    userChapterFilter.addEventListener("change", updateUserSummary);
+    userOrderSelect.addEventListener("change", updateUserSummary);
+    userCountSelect.addEventListener("change", updateUserSummary);
+    userQuickStartButton.addEventListener("click", startUserQuickQuiz);
+    userAllSequentialButton.addEventListener("click", startUserAllSequentialQuiz);
+    userStartSelectedButton.addEventListener("click", startUserSelectedQuiz);
+    backButton.addEventListener("click", goBack);
     nextButton.addEventListener("click", goToNextQuestion);
 
     showScreenForLoginState();
